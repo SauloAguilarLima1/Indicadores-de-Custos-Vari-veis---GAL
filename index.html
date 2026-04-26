@@ -146,8 +146,8 @@
     const SHEET_GID = '1772527839';
     const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
     const SHEET_URL_FALLBACK = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
-    const REFRESH_INTERVAL = 5 * 60 * 1000;
-    const RETRY_INTERVAL = 30 * 1000;
+    const REFRESH_INTERVAL = 30 * 1000;   // 30s - atualizacao quase em tempo real
+    const RETRY_INTERVAL = 15 * 1000;
     const HOTEL_KEYS = ['Terra Boa','Pedra Torta','Resende Imperial','Vira Canoa'];
     // Normalize: lowercase, strip accents, collapse spaces
     function normStr(s){return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim()}
@@ -356,8 +356,8 @@
     // "1.234"→1234, "0.0"→0, "19027.68"→19027.68, ""→null, "-"→null, NBSP/BOM safe.
     function parseMoney(v){
       if(v===null||v===undefined)return null;
-      let s=String(v).replace(/^\uFEFF/,'').trim();
-      if(!s||s==='-'||s==='—'||s==='–'||s.toLowerCase()==='null'||s==='#N/A'||s==='#REF!'||s==='#DIV/0!')return null;
+      let s=String(v).replace(/^\uFEFF/,'').replace(/^'/,'').trim();
+      if(!s||s==='-'||s==='—'||s==='–'||s.toLowerCase()==='null'||s==='#N/A'||s==='#REF!'||s==='#DIV/0!'||s.toLowerCase()==='false'||s.toLowerCase()==='true')return null;
       // Strip currency/percent/spaces (incl. NBSP \u00A0 and zero-width \u200B)
       s=s.replace(/R\$/gi,'').replace(/[\s\u00A0\u200B]/g,'').replace(/%/g,'');
       if(!s||s==='-')return null;
@@ -457,6 +457,17 @@
       console.info('[GAL Dashboard] Linhas processadas:',stats.rows,'| puladas:',stats.skipped,
         stats.unknownEmp.size?'| empresas desconhecidas: '+[...stats.unknownEmp].join(', '):'',
         stats.unknownMonth.size?'| meses desconhecidos: '+[...stats.unknownMonth].join(', '):'');
+      const missing=[];
+      Object.keys(D).forEach(yr=>{
+        Object.keys(D[yr].hotels||{}).forEach(hk=>{
+          const h=D[yr].hotels[hk];
+          h.cafe.forEach((v,i)=>{
+            const hasOther=isVal(h.energia[i])||isVal(h.lavanderia[i])||isVal(h.agua[i])||isVal(h.pax[i]);
+            if(!isVal(v)&&hasOther)missing.push(yr+' '+MONTH_NAMES[i]+' '+hk);
+          });
+        });
+      });
+      if(missing.length)console.warn('[GAL Dashboard] Cafe AUSENTE em (verifique a celula da planilha):',missing.join(' | '));
       Object.keys(D).forEach(yr=>{
         HOTEL_KEYS.forEach(hk=>{if(!D[yr].hotels[hk])D[yr].hotels[hk]=mkEmpty()});
         Object.values(D[yr].hotels).forEach(h=>computeDerived(h));
@@ -477,7 +488,8 @@
 
     async function fetchCSVFromSheet(){
       // Try by sheet name first; fall back to gid if name-based request fails
-      const urls=[SHEET_URL+'&t='+Date.now(),SHEET_URL_FALLBACK+'&t='+Date.now()];
+      const cb='&t='+Date.now()+'&r='+Math.random().toString(36).slice(2);
+      const urls=[SHEET_URL+cb,SHEET_URL_FALLBACK+cb];
       let lastErr=null;
       for(const u of urls){
         try{
