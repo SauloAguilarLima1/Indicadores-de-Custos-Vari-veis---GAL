@@ -698,30 +698,38 @@
     body.numbers-hidden .js-plotly-plot .legend text,
     body.numbers-hidden .js-plotly-plot g.legend text { filter: none; }
 
-    /* === Tabs === */
+    /* === Tabs (vertical sidebar à esquerda) === */
     .tabs {
-      margin: 0 16px;
-      display: inline-flex;
-      flex-wrap: wrap;
+      position: fixed;
+      left: 16px;
+      top: 110px;
+      width: 220px;
+      max-height: calc(100vh - 126px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
       gap: 4px;
-      padding: 6px;
+      padding: 8px;
       background: var(--glass-bg);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
       border: 1px solid var(--glass-border);
-      border-radius: var(--r-pill);
-      width: fit-content;
-      max-width: calc(100% - 32px);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-glass);
+      z-index: 80;
     }
     .tab {
       background: transparent;
       border: none;
       color: var(--text-secondary);
-      padding: 8px 18px;
-      font-size: 12.5px;
+      width: 100%;
+      text-align: left;
+      padding: 11px 16px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      border-radius: var(--r-pill);
+      border-radius: var(--r-md);
       white-space: nowrap;
       transition: all var(--dur-base) var(--ease-glide);
       letter-spacing: -0.005em;
@@ -734,12 +742,15 @@
       font-weight: 600;
     }
 
-    /* === Container === */
+    /* === Container — abre espaço pra sidebar à esquerda === */
     .container {
       max-width: 1480px;
-      margin: 24px auto 0;
-      padding: 0 16px 80px;
+      margin: 24px 16px 0 256px;
+      padding: 0 0 80px;
     }
+
+    /* Filter-bar também recuada pra não passar por baixo da sidebar */
+    .filter-bar { margin-left: 256px; }
 
     /* === Panel header === */
     .panel-header {
@@ -1002,6 +1013,32 @@
     }
 
     /* === Responsive === */
+    /* Telas <= 1024px: sidebar volta a ser pill horizontal no topo */
+    @media (max-width: 1024px) {
+      .tabs {
+        position: static;
+        left: auto;
+        top: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: fit-content;
+        max-width: calc(100% - 32px);
+        max-height: none;
+        overflow-y: visible;
+        margin: 0 16px;
+        border-radius: var(--r-pill);
+        padding: 6px;
+      }
+      .tab {
+        width: auto;
+        text-align: center;
+        border-radius: var(--r-pill);
+        padding: 8px 18px;
+        font-size: 12.5px;
+      }
+      .filter-bar { margin-left: 16px; }
+      .container { margin: 24px auto 0; padding: 0 16px 80px; }
+    }
     @media (max-width: 768px) {
       .header { padding: 12px 16px; gap: 12px; }
       .header-logo { height: 36px; }
@@ -1102,9 +1139,9 @@
 
     const TABS=[
       {id:'consolidado',label:'Consolidado',type:'consolidated',logo:'grupo',color:'#6da3d9'},
+      {id:'resende-imperial',label:'Resende Imperial',type:'hotel',dataKey:'Resende Imperial',logo:'resende',color:'#5fd6e4'},
       {id:'terra-boa',label:'Terra Boa',type:'hotel',dataKey:'Terra Boa',logo:'terra_boa',color:'#8db272'},
       {id:'pedra-torta',label:'Pedra Torta',type:'hotel',dataKey:'Pedra Torta',logo:'pedra_torta',color:'#7dc4e0'},
-      {id:'resende-imperial',label:'Resende Imperial',type:'hotel',dataKey:'Resende Imperial',logo:'resende',color:'#5fd6e4'},
       {id:'vira-canoa',label:'Vira Canoa',type:'hotel',dataKey:'Vira Canoa',logo:'vira_canoa',color:'#f0b94c'}
     ];
     const COSTS=[
