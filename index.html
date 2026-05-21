@@ -1344,7 +1344,7 @@
           textposition:'outside',
           textfont:{family:"'Inter',system-ui,sans-serif",size:11,color:isLight()?'#0f1318':'#e8ecf4'},
           hovertemplate:'<b>%{x}</b><br>R$ %{y:.2f} / PAX<extra></extra>'
-        }], {...buildBL(), bargap:0.35, yaxis:{...buildBL().yaxis, title:{text:'R$ / PAX',font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}}, showlegend:false}, CC);
+        }], {...buildBL(), margin:{...buildBL().margin, t:48}, bargap:0.35, yaxis:{...buildBL().yaxis, title:{text:'R$ / PAX',font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}}, showlegend:false}, CC);
       }
     }
 
