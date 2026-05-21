@@ -766,15 +766,24 @@
     .tab.active {
       color: var(--text-primary);
       font-weight: 600;
-      background: linear-gradient(90deg,
-        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 28%, transparent) 0%,
-        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 14%, transparent) 50%,
-        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 4%, transparent) 100%);
+      /* Frosted-glass com luz acesa por tras: centro difuso e suave,
+         borda interna captando a luz e aura externa em camadas */
+      background:
+        radial-gradient(ellipse 110% 110% at 50% 50%,
+          color-mix(in srgb, var(--tab-color, var(--accent-primary)) 3%, transparent) 0%,
+          color-mix(in srgb, var(--tab-color, var(--accent-primary)) 8%, transparent) 55%,
+          color-mix(in srgb, var(--tab-color, var(--accent-primary)) 18%, transparent) 100%);
       border-color: color-mix(in srgb, var(--tab-color, var(--accent-primary)) 55%, transparent);
       box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 30%, transparent),
-        0 10px 32px -8px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 60%, transparent),
-        inset 0 0 22px -6px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 35%, transparent);
+        /* Luz vazando pela borda interna do "vidro" */
+        inset 0 0 14px -2px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 28%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--tab-color, var(--accent-primary)) 35%, transparent),
+        /* Aura externa em 4 camadas progressivamente mais suaves/largas */
+        0 0 0 1px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 28%, transparent),
+        0 0 12px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 40%, transparent),
+        0 0 28px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 32%, transparent),
+        0 0 56px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 22%, transparent),
+        0 0 90px -10px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 18%, transparent);
     }
     .tab.active .tab-dot {
       box-shadow:
