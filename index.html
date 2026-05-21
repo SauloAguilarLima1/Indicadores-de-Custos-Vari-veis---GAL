@@ -332,6 +332,165 @@
     }
     .reset-link:hover { filter: brightness(1.2); }
 
+    /* === Period trigger + month picker (estilo NPS) === */
+    .period-picker { position: relative; }
+    .period-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px 7px 14px;
+      min-width: 180px;
+      border-radius: var(--r-pill);
+      background: var(--glass-bg-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      cursor: pointer;
+      transition: all var(--dur-base) var(--ease-glide);
+      white-space: nowrap;
+    }
+    .period-trigger:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border-strong);
+    }
+    .period-trigger[aria-expanded="true"] {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-soft), 0 6px 20px -8px var(--accent-glow);
+    }
+    .period-trigger__value { color: var(--text-primary); flex: 1; text-align: left; }
+    .period-trigger__chevron {
+      width: 14px;
+      height: 14px;
+      margin-left: 4px;
+      color: var(--accent-primary);
+      transition: transform var(--dur-base) var(--ease-glide);
+    }
+    .period-trigger[aria-expanded="true"] .period-trigger__chevron { transform: rotate(180deg); }
+
+    .monthpicker {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 286px;
+      padding: 16px;
+      background: var(--glass-bg-strong);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-glass);
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+      transform-origin: top left;
+      pointer-events: none;
+      transition: opacity var(--dur-base) var(--ease-glide), transform var(--dur-base) var(--ease-glide);
+      z-index: 60;
+    }
+    .monthpicker--open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .monthpicker__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .monthpicker__year {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .monthpicker__nav {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--surface-soft);
+      border: 1px solid var(--segment-border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .monthpicker__nav:hover {
+      background: var(--surface-soft-hover);
+      color: var(--text-primary);
+    }
+    .monthpicker__nav svg { width: 14px; height: 14px; }
+    .monthpicker__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .monthpicker__month {
+      padding: 11px 0;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-align: center;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .monthpicker__month:hover {
+      background: var(--surface-soft-hover);
+      color: var(--text-primary);
+    }
+    .monthpicker__month--in-range {
+      background: var(--accent-soft);
+      color: var(--accent-primary);
+    }
+    .monthpicker__month--edge {
+      background: var(--accent-primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 14px -4px var(--accent-glow);
+    }
+    .monthpicker__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .monthpicker__hint {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.01em;
+    }
+    .monthpicker__apply {
+      flex-shrink: 0;
+      padding: 8px 18px;
+      border-radius: var(--r-pill);
+      background: var(--accent-primary);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      border: none;
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .monthpicker__apply:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+    .monthpicker__apply:disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
     /* === Tabs === */
     .tabs {
       margin: 0 16px;
@@ -679,9 +838,28 @@
     <div class="filter-group"><span class="filter-label">Ano</span><div class="year-pills" id="yearPills"></div></div>
     <div class="filter-group">
       <span class="filter-label">Período</span>
-      <select class="month-select" id="monthFrom"></select>
-      <span style="color:var(--text-tertiary);font-size:11px;letter-spacing:.04em">até</span>
-      <select class="month-select" id="monthTo"></select>
+      <div class="period-picker" id="periodPicker">
+        <button class="period-trigger" id="periodTrigger" type="button" aria-expanded="false" aria-haspopup="dialog">
+          <span class="period-trigger__value" id="periodLabel">Ano todo</span>
+          <svg class="period-trigger__chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6 L8 10 L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="monthpicker" id="monthPicker" role="dialog" aria-label="Período personalizado">
+          <div class="monthpicker__head">
+            <button class="monthpicker__nav" type="button" data-nav="-1" aria-label="Ano anterior">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M10 4 L6 8 L10 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <span class="monthpicker__year" id="monthPickerYear">2026</span>
+            <button class="monthpicker__nav" type="button" data-nav="1" aria-label="Próximo ano">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M6 4 L10 8 L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="monthpicker__grid" id="monthPickerGrid"></div>
+          <div class="monthpicker__footer">
+            <span class="monthpicker__hint" id="monthPickerHint">Selecione o mês inicial</span>
+            <button class="monthpicker__apply" id="monthPickerApply" type="button" disabled>Aplicar</button>
+          </div>
+        </div>
+      </div>
       <button class="reset-link" id="resetPeriod">↺ Ano todo</button>
     </div>
   </div>
@@ -942,10 +1120,95 @@
       el.innerHTML=YEARS.map(y=>`<button class="year-pill ${y===S.year?'active':''}" data-year="${y}">${y}${PARTIAL.includes(y)?'<span class="partial-badge">parcial</span>':''}</button>`).join('');
       el.querySelectorAll('.year-pill').forEach(b=>{b.addEventListener('click',()=>{S.year=b.dataset.year;clampP();renderAll()})});
     }
+    /* === Month picker (estilo NPS) ============================================ */
+    const picker = { year: null, start: null, end: null };
+
     function renderMS(){
-      const f=document.getElementById('monthFrom'),t=document.getElementById('monthTo');
-      f.innerHTML=ML.map((m,i)=>`<option value="${i}" ${i===S.mF?'selected':''}>${MF[i]}</option>`).join('');
-      t.innerHTML=ML.map((m,i)=>`<option value="${i}" ${i===S.mT?'selected':''}>${MF[i]}</option>`).join('');
+      /* Atualiza só o label do trigger; o picker em si renderiza on demand */
+      const lbl = document.getElementById('periodLabel');
+      if (!lbl) return;
+      if (S.mF === 0 && S.mT === 11) {
+        lbl.textContent = `Ano todo · ${S.year}`;
+      } else if (S.mF === S.mT) {
+        lbl.textContent = `${MF[S.mF]} ${S.year}`;
+      } else {
+        lbl.textContent = `${ML[S.mF]} – ${ML[S.mT]} ${S.year}`;
+      }
+    }
+
+    function openMonthPicker(){
+      picker.year = S.year;
+      picker.start = { y: +S.year, m: S.mF };
+      picker.end = { y: +S.year, m: S.mT };
+      renderMonthPicker();
+      document.getElementById('monthPicker').classList.add('monthpicker--open');
+      document.getElementById('periodTrigger').setAttribute('aria-expanded', 'true');
+    }
+    function closeMonthPicker(){
+      document.getElementById('monthPicker').classList.remove('monthpicker--open');
+      document.getElementById('periodTrigger').setAttribute('aria-expanded', 'false');
+    }
+    function renderMonthPicker(){
+      const yrEl = document.getElementById('monthPickerYear');
+      const gridEl = document.getElementById('monthPickerGrid');
+      const hintEl = document.getElementById('monthPickerHint');
+      const applyEl = document.getElementById('monthPickerApply');
+      yrEl.textContent = picker.year;
+      const sameYear = picker.start && picker.end && picker.start.y === picker.end.y;
+      gridEl.innerHTML = ML.map((label, m) => {
+        let cls = 'monthpicker__month';
+        if (picker.start && picker.end && sameYear && picker.year === picker.start.y) {
+          if (m === picker.start.m || m === picker.end.m) cls += ' monthpicker__month--edge';
+          else if (m > picker.start.m && m < picker.end.m) cls += ' monthpicker__month--in-range';
+        } else if (picker.start && !picker.end && picker.year === picker.start.y && m === picker.start.m) {
+          cls += ' monthpicker__month--edge';
+        }
+        return `<button type="button" class="${cls}" data-month="${m}">${label}</button>`;
+      }).join('');
+      if (picker.start && picker.end) {
+        if (picker.start.y === picker.end.y) {
+          hintEl.textContent = picker.start.m === picker.end.m
+            ? `${MF[picker.start.m]} ${picker.start.y}`
+            : `${ML[picker.start.m]} – ${ML[picker.end.m]} ${picker.start.y}`;
+        } else {
+          hintEl.textContent = `${ML[picker.start.m]}/${String(picker.start.y).slice(2)} – ${ML[picker.end.m]}/${String(picker.end.y).slice(2)}`;
+        }
+        applyEl.disabled = false;
+      } else if (picker.start) {
+        hintEl.textContent = 'Selecione o mês final';
+        applyEl.disabled = true;
+      } else {
+        hintEl.textContent = 'Selecione o mês inicial';
+        applyEl.disabled = true;
+      }
+    }
+    function pickerPickMonth(m){
+      const sel = { y: picker.year, m };
+      const mn = s => s.y * 12 + s.m;
+      if (!picker.start || (picker.start && picker.end)) {
+        picker.start = sel; picker.end = null;
+      } else if (mn(sel) < mn(picker.start)) {
+        picker.start = sel; picker.end = null;
+      } else if (mn(sel) === mn(picker.start)) {
+        picker.end = sel;
+      } else {
+        picker.end = sel;
+      }
+      renderMonthPicker();
+    }
+    function applyMonthPicker(){
+      if (!picker.start || !picker.end) return;
+      /* Cross-year: pega o ano do start. Se cruzar, o mês final fica em dez do ano start. */
+      const targetYear = String(picker.start.y);
+      if (!DATA[targetYear]) { closeMonthPicker(); return; }
+      S.year = targetYear;
+      S.mF = picker.start.m;
+      S.mT = picker.start.y === picker.end.y ? picker.end.m : 11;
+      clampP();
+      closeMonthPicker();
+      renderYP();
+      renderMS();
+      renderContent();
     }
     function renderTabs(){
       const el=document.getElementById('tabs');
@@ -983,8 +1246,23 @@
       const cur = document.documentElement.dataset.mode === 'light' ? 'light' : 'dark';
       applyMode(cur === 'light' ? 'dark' : 'light');
     });
-    document.getElementById('monthFrom').addEventListener('change',e=>{S.mF=+e.target.value;if(S.mF>S.mT)S.mT=S.mF;renderMS();renderContent()});
-    document.getElementById('monthTo').addEventListener('change',e=>{S.mT=+e.target.value;if(S.mT<S.mF)S.mF=S.mT;renderMS();renderContent()});
+    document.getElementById('periodTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = document.getElementById('monthPicker').classList.contains('monthpicker--open');
+      if (open) closeMonthPicker(); else openMonthPicker();
+    });
+    document.getElementById('monthPicker').addEventListener('click', e => e.stopPropagation());
+    document.getElementById('monthPicker').querySelectorAll('[data-nav]').forEach(btn => {
+      btn.addEventListener('click', () => { picker.year += parseInt(btn.dataset.nav, 10); renderMonthPicker(); });
+    });
+    document.getElementById('monthPickerGrid').addEventListener('click', e => {
+      const b = e.target.closest('[data-month]');
+      if (b) pickerPickMonth(+b.dataset.month);
+    });
+    document.getElementById('monthPickerApply').addEventListener('click', applyMonthPicker);
+    document.addEventListener('click', () => {
+      if (document.getElementById('monthPicker').classList.contains('monthpicker--open')) closeMonthPicker();
+    });
     document.getElementById('resetPeriod').addEventListener('click',()=>{S.mF=0;S.mT=11;clampP();renderMS();renderContent()});
     window.addEventListener('load',()=>{document.getElementById('headerLogo').src=`data:image/png;base64,${LOGOS.grupo}`;clampP();renderAll();uTS()});
   </script>
