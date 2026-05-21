@@ -1030,8 +1030,17 @@
     function tYK(y,py){return y?`<div class="kpi-yoy ${yBC(y.pct)}">${yTxt(y,py)}</div>`:''}
     function tYC(y,py){return y?`<div class="cost-yoy ${yBC(y.pct)}">${yTxt(y,py)}</div>`:''}
     function tBanner(yr){const n=cntV(DATA[yr].consolidated.total_costs);const ms=DATA[yr].consolidated.months.filter((_,i)=>isVal(DATA[yr].consolidated.total_costs[i])).join(', ');return`<div class="banner"><strong>${yr} parcial</strong> · ${n} mês(es) com dados (${ms})</div>`}
-    function tPH(tab,yr){const src=LOGOS[tab.logo]?`data:image/png;base64,${LOGOS[tab.logo]}`:'';const nm=tab.type==='consolidated'?'Grupo Aguilar Lima — Consolidado':tab.label.replace(/^[^\s]+\s/,'');return`<div class="panel-header" style="--accent-primary:${tab.color}">${src?`<img class="panel-logo" data-logo="${tab.logo}" src="${src}" alt="${nm}">`:''}
-      <div class="panel-title-block"><h2>${nm} · ${yr}</h2><p>Período · ${pLabel()}</p></div></div>`}
+    function tPH(tab,yr){
+      const src = LOGOS[tab.logo] ? `data:image/png;base64,${LOGOS[tab.logo]}` : '';
+      const alt = tab.type === 'consolidated' ? 'Grupo Aguilar Lima — Consolidado' : tab.label;
+      return `<div class="panel-header" style="--accent-primary:${tab.color}">
+        ${src ? `<img class="panel-logo" data-logo="${tab.logo}" src="${src}" alt="${alt}">` : ''}
+        <div class="panel-title-block">
+          <h2>${yr}</h2>
+          <p>${pLabel()}</p>
+        </div>
+      </div>`;
+    }
 
     function buildPanel(tab){
       const yr=S.year,ic=tab.type==='consolidated';
@@ -1097,34 +1106,33 @@
       const tr=[];
       const prev=prevYearColor();
       if(ic){
+        /* Consolidado: barras agrupadas por hotel, cada uma com a cor do hotel */
         Object.entries(DATA[yr].hotels).forEach(([nm,h])=>{
           const col=HOTEL_COLORS[nm];
           tr.push({
             x:h.months, y:sliceP(getED(h,mk,mode)), name:nm,
-            type:'scatter', mode:'lines+markers',
-            line:{color:col, width:2.5, shape:'spline', smoothing:0.8},
-            marker:{size:6, color:col, line:{color:'rgba(255,255,255,0)', width:0}},
-            connectgaps:false,
+            type:'bar',
+            marker:{ color:h2r(col, isLight()?0.50:0.55), line:{width:0}, cornerradius:6 },
             hovertemplate:`<b>%{x}</b><br>${nm}: R$ %{y:${getFmt(mode)}}<extra></extra>`
           });
         });
-        if(py){tr.push({
-          x:DATA[py].consolidated.months, y:sliceP(getED(DATA[py].consolidated,mk,mode)),
-          name:`Total ${py}`, type:'scatter', mode:'lines',
-          line:{color:prev, width:1.5, dash:'dot', shape:'spline', smoothing:0.8},
-          connectgaps:false,
-          hovertemplate:`<b>%{x}</b><br>Total ${py}: R$ %{y:${getFmt(mode)}}<extra></extra>`
-        })}
+        if(py){
+          tr.push({
+            x:DATA[py].consolidated.months, y:sliceP(getED(DATA[py].consolidated,mk,mode)),
+            name:`Total ${py}`, type:'scatter', mode:'lines',
+            line:{color:prev, width:1.5, dash:'dot', shape:'spline', smoothing:0.8},
+            connectgaps:false,
+            hovertemplate:`<b>%{x}</b><br>Total ${py}: R$ %{y:${getFmt(mode)}}<extra></extra>`
+          });
+        }
       }else{
+        /* Hotel individual: barra unica com a cor do hotel */
         const h=DATA[yr].hotels[tab.dataKey];
         const col=ac||tab.color;
         tr.push({
           x:h.months, y:sliceP(getED(h,mk,mode)), name:`${yr}`,
-          type:'scatter', mode:'lines+markers',
-          line:{color:col, width:3, shape:'spline', smoothing:0.85},
-          marker:{size:7, color:col, line:{color:isLight()?'#ffffff':'#0c0c0c', width:2}},
-          fill:'tozeroy', fillcolor:h2r(col,isLight()?.10:.18),
-          connectgaps:false,
+          type:'bar',
+          marker:{ color:h2r(col, isLight()?0.50:0.55), line:{width:0}, cornerradius:10 },
           hovertemplate:`<b>%{x}</b><br>${yr}: R$ %{y:${getFmt(mode)}}<extra></extra>`
         });
         if(py){
@@ -1135,10 +1143,10 @@
             line:{color:prev, width:1.5, dash:'dot', shape:'spline', smoothing:0.85},
             connectgaps:false,
             hovertemplate:`<b>%{x}</b><br>${py}: R$ %{y:${getFmt(mode)}}<extra></extra>`
-          })
+          });
         }
       }
-      // META LINE: red dashed line when mode='pax', year >= 2026, cafe or lavanderia
+      /* META LINE: red dashed line when mode='pax', year >= 2026, cafe or lavanderia */
       if(mode==='pax' && parseInt(yr)>=2026 && (mk==='cafe'||mk==='lavanderia')){
         const metaArr = ic ? getMetaArr(yr,null,mk) : getMetaArr(yr,tab.dataKey,mk);
         if(metaArr){
@@ -1148,10 +1156,17 @@
             line:{color:'#f87171', width:2, dash:'dash'},
             connectgaps:false,
             hovertemplate:`<b>%{x}</b><br>Meta: R$ %{y:.2f} / PAX<extra></extra>`
-          })
+          });
         }
       }
-      Plotly.newPlot(divId, tr, {...buildBL(), yaxis:{...buildBL().yaxis, title:{text:getYT(mode),font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}, tickformat:getFmt(mode)}}, CC);
+      const layout = {
+        ...buildBL(),
+        barmode: 'group',
+        bargap: 0.30,
+        bargroupgap: 0.05,
+        yaxis: {...buildBL().yaxis, title:{text:getYT(mode),font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}, tickformat:getFmt(mode)}
+      };
+      Plotly.newPlot(divId, tr, layout, CC);
     }
 
     function renderCharts(tab){
@@ -1178,12 +1193,16 @@
         const av=hs.map(h=>avgV(sliceP(DATA[yr].hotels[h].cost_per_pax)));
         Plotly.newPlot('chart-by-hotel',[{
           x:hs, y:av, type:'bar',
-          marker:{color:hs.map(h=>HOTEL_COLORS[h]), line:{color:'rgba(255,255,255,0)',width:0}},
+          marker:{
+            color: hs.map(h => h2r(HOTEL_COLORS[h], isLight()?0.50:0.55)),
+            line: { width: 0 },
+            cornerradius: 12
+          },
           text:av.map(v=>'R$ '+fD(v)),
           textposition:'outside',
           textfont:{family:"'Inter',system-ui,sans-serif",size:11,color:isLight()?'#0f1318':'#e8ecf4'},
           hovertemplate:'<b>%{x}</b><br>R$ %{y:.2f} / PAX<extra></extra>'
-        }], {...buildBL(), yaxis:{...buildBL().yaxis, title:{text:'R$ / PAX',font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}}, showlegend:false}, CC);
+        }], {...buildBL(), bargap:0.35, yaxis:{...buildBL().yaxis, title:{text:'R$ / PAX',font:{size:11,color:isLight()?'rgba(75,85,99,0.7)':'rgba(168,176,191,0.55)'}}}, showlegend:false}, CC);
       }
     }
 
