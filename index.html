@@ -566,6 +566,138 @@
       pointer-events: none;
     }
 
+    /* === Year picker (mesmo estilo do period picker) === */
+    .year-picker { position: relative; z-index: 200; }
+    .year-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      min-width: 110px;
+      border-radius: var(--r-pill);
+      background: var(--glass-bg-strong);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      cursor: pointer;
+      transition: all var(--dur-base) var(--ease-glide);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .year-trigger:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border-strong);
+    }
+    .year-trigger[aria-expanded="true"] {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-soft), 0 6px 20px -8px var(--accent-glow);
+    }
+    .year-trigger__value { color: var(--text-primary); flex: 1; text-align: left; display: inline-flex; align-items: center; gap: 6px; }
+    .year-trigger__chevron {
+      width: 14px;
+      height: 14px;
+      margin-left: 4px;
+      color: var(--accent-primary);
+      transition: transform var(--dur-base) var(--ease-glide);
+    }
+    .year-trigger[aria-expanded="true"] .year-trigger__chevron { transform: rotate(180deg); }
+
+    .yearpicker {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 140px;
+      padding: 6px;
+      background: var(--glass-bg-strong);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-glass);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+      transform-origin: top left;
+      pointer-events: none;
+      transition: opacity var(--dur-base) var(--ease-glide), transform var(--dur-base) var(--ease-glide);
+      z-index: 300;
+    }
+    :root:not([data-mode="light"]) .yearpicker {
+      background:
+        linear-gradient(180deg, rgba(20,20,22,0.96), rgba(12,12,14,0.96)),
+        var(--glass-bg-strong);
+    }
+    :root[data-mode="light"] .yearpicker {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,253,0.96)),
+        var(--glass-bg-strong);
+    }
+    .yearpicker--open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .yearpicker__option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      text-align: left;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-glide);
+      font-variant-numeric: tabular-nums;
+    }
+    .yearpicker__option:hover {
+      background: var(--surface-soft-hover);
+      color: var(--text-primary);
+    }
+    .yearpicker__option--active {
+      background: var(--accent-soft);
+      color: var(--accent-primary);
+      box-shadow: inset 0 0 0 1px var(--accent-primary);
+      font-weight: 600;
+    }
+
+    /* === Hide-numbers toggle button === */
+    .btn-icon { padding: 8px; line-height: 0; }
+    .btn-icon svg { display: block; }
+    .btn-hide .hide-slash { transition: opacity var(--dur-fast) var(--ease-glide); }
+    body.numbers-hidden .btn-hide {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: var(--accent-soft);
+    }
+    body.numbers-hidden .btn-hide .hide-slash { opacity: 0; }
+
+    /* === Hide numbers — blurs numeric content while preserving layout === */
+    body.numbers-hidden .kpi-value,
+    body.numbers-hidden .cost-value,
+    body.numbers-hidden .kpi-yoy,
+    body.numbers-hidden .cost-yoy,
+    body.numbers-hidden .updated strong,
+    body.numbers-hidden .last-update__time,
+    body.numbers-hidden .period-trigger__value,
+    body.numbers-hidden .year-trigger__value,
+    body.numbers-hidden .monthpicker__year,
+    body.numbers-hidden .yearpicker__option-year {
+      filter: blur(8px);
+      user-select: none;
+    }
+    body.numbers-hidden .js-plotly-plot text { filter: blur(6px); }
+    body.numbers-hidden .js-plotly-plot .legend text,
+    body.numbers-hidden .js-plotly-plot g.legend text { filter: none; }
+
     /* === Tabs === */
     .tabs {
       margin: 0 16px;
@@ -902,6 +1034,13 @@
           <svg class="icon-day" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         </span>
       </button>
+      <button class="btn btn-icon btn-hide" id="hideToggle" aria-label="Esconder números" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+          <circle cx="12" cy="12" r="3"/>
+          <line class="hide-slash" x1="4" y1="20" x2="20" y2="4"/>
+        </svg>
+      </button>
       <button class="btn" id="refresh" aria-label="Atualizar">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Atualizar
@@ -916,7 +1055,16 @@
     </div>
   </header>
   <div class="filter-bar">
-    <div class="filter-group"><span class="filter-label">Ano</span><div class="year-pills" id="yearPills"></div></div>
+    <div class="filter-group">
+      <span class="filter-label">Ano</span>
+      <div class="year-picker" id="yearPicker">
+        <button class="year-trigger" id="yearTrigger" type="button" aria-expanded="false" aria-haspopup="listbox">
+          <span class="year-trigger__value" id="yearTriggerLabel">—</span>
+          <svg class="year-trigger__chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6 L8 10 L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="yearpicker" id="yearPickerList" role="listbox" aria-label="Selecionar ano"></div>
+      </div>
+    </div>
     <div class="filter-group">
       <span class="filter-label">Período</span>
       <div class="period-picker" id="periodPicker">
@@ -1078,23 +1226,23 @@
     function buildBL(){
       const light = isLight();
       const tickColor   = light ? 'rgba(75,85,99,0.75)'   : 'rgba(168,176,191,0.55)';
-      const gridColor   = light ? 'rgba(15,19,24,0.06)'   : 'rgba(255,255,255,0.04)';
       const textColor   = light ? '#0f1318'               : '#e8ecf4';
       const tooltipBg   = light ? 'rgba(255,255,255,0.96)': 'rgba(10,14,22,0.94)';
       const tooltipBd   = light ? 'rgba(15,19,24,0.10)'   : 'rgba(255,255,255,0.08)';
       return {
         plot_bgcolor:'rgba(0,0,0,0)',
         paper_bgcolor:'rgba(0,0,0,0)',
+        dragmode:false,
         margin:{t:24,r:28,b:56,l:64},
         font:{family:"'Inter',system-ui,sans-serif",color:textColor,size:12},
-        xaxis:{gridcolor:gridColor,zerolinecolor:'rgba(0,0,0,0)',tickfont:{color:tickColor,size:11},linecolor:'rgba(0,0,0,0)',showspikes:false},
-        yaxis:{gridcolor:gridColor,zerolinecolor:gridColor,tickfont:{color:tickColor,size:11},linecolor:'rgba(0,0,0,0)'},
+        xaxis:{showgrid:false,zeroline:false,tickfont:{color:tickColor,size:11},linecolor:'rgba(0,0,0,0)',showspikes:false,fixedrange:true},
+        yaxis:{showgrid:false,zeroline:false,tickfont:{color:tickColor,size:11},linecolor:'rgba(0,0,0,0)',fixedrange:true},
         hoverlabel:{bgcolor:tooltipBg,bordercolor:tooltipBd,font:{family:"'Inter',system-ui,sans-serif",color:textColor,size:12},align:'left'},
         legend:{orientation:'h',y:-.22,x:.5,xanchor:'center',font:{color:tickColor,size:11},bgcolor:'rgba(0,0,0,0)'}
       };
     }
     let BL = buildBL();
-    const CC = { responsive:true, displayModeBar:false };
+    const CC = { responsive:true, displayModeBar:false, scrollZoom:false, doubleClick:false };
     function getED(d,mk,mode){const r=d[mk];if(mode==='pax')return divArr(r,d.pax);if(mode==='diaria')return divArr(r,d.diarias);return r}
     function getYT(m){return m==='pax'?'R$ / PAX':m==='diaria'?'R$ / Diária':'R$'}
     function getFmt(m){return m==='total'?',.0f':',.2f'}
@@ -1210,9 +1358,37 @@
     function clampP(){const c=DATA[S.year].consolidated,v=c.total_costs.map((x,i)=>isVal(x)?i:-1).filter(i=>i>=0);if(!v.length){S.mF=0;S.mT=11;return}const l=v[v.length-1];if(S.mT>l)S.mT=l;if(S.mF>S.mT)S.mF=0}
 
     function renderYP(){
-      const el=document.getElementById('yearPills');
-      el.innerHTML=YEARS.map(y=>`<button class="year-pill ${y===S.year?'active':''}" data-year="${y}">${y}${PARTIAL.includes(y)?'<span class="partial-badge">parcial</span>':''}</button>`).join('');
-      el.querySelectorAll('.year-pill').forEach(b=>{b.addEventListener('click',()=>{S.year=b.dataset.year;clampP();renderAll()})});
+      const lbl = document.getElementById('yearTriggerLabel');
+      const list = document.getElementById('yearPickerList');
+      if (lbl) {
+        const partial = PARTIAL.includes(S.year) ? '<span class="partial-badge">parcial</span>' : '';
+        lbl.innerHTML = `<span class="yearpicker__option-year">${S.year}</span>${partial}`;
+      }
+      if (list) {
+        const ordered = YEARS.slice().sort();
+        list.innerHTML = ordered.map(y => {
+          const active = y === S.year ? ' yearpicker__option--active' : '';
+          const partial = PARTIAL.includes(y) ? '<span class="partial-badge">parcial</span>' : '';
+          return `<button class="yearpicker__option${active}" data-year="${y}" role="option" type="button"><span class="yearpicker__option-year">${y}</span>${partial}</button>`;
+        }).join('');
+        list.querySelectorAll('.yearpicker__option').forEach(b => {
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            S.year = b.dataset.year;
+            clampP();
+            closeYearPicker();
+            renderAll();
+          });
+        });
+      }
+    }
+    function openYearPicker(){
+      document.getElementById('yearPickerList').classList.add('yearpicker--open');
+      document.getElementById('yearTrigger').setAttribute('aria-expanded','true');
+    }
+    function closeYearPicker(){
+      document.getElementById('yearPickerList').classList.remove('yearpicker--open');
+      document.getElementById('yearTrigger').setAttribute('aria-expanded','false');
     }
     /* === Month picker (estilo NPS) ============================================ */
     const picker = { year: null, start: null, end: null };
@@ -1539,10 +1715,24 @@
     });
     document.getElementById('periodTrigger').addEventListener('click', (e) => {
       e.stopPropagation();
+      closeYearPicker();
       const open = document.getElementById('monthPicker').classList.contains('monthpicker--open');
       if (open) closeMonthPicker(); else openMonthPicker();
     });
     document.getElementById('monthPicker').addEventListener('click', e => e.stopPropagation());
+    document.getElementById('yearTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMonthPicker();
+      const open = document.getElementById('yearPickerList').classList.contains('yearpicker--open');
+      if (open) closeYearPicker(); else openYearPicker();
+    });
+    document.getElementById('yearPickerList').addEventListener('click', e => e.stopPropagation());
+    document.getElementById('hideToggle').addEventListener('click', () => {
+      const btn = document.getElementById('hideToggle');
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      document.body.classList.toggle('numbers-hidden', !pressed);
+    });
     document.getElementById('monthPicker').querySelectorAll('[data-nav]').forEach(btn => {
       btn.addEventListener('click', () => { picker.year += parseInt(btn.dataset.nav, 10); renderMonthPicker(); });
     });
@@ -1553,6 +1743,8 @@
     document.getElementById('monthPickerApply').addEventListener('click', applyMonthPicker);
     document.addEventListener('click', () => {
       if (document.getElementById('monthPicker').classList.contains('monthpicker--open')) closeMonthPicker();
+      const yl = document.getElementById('yearPickerList');
+      if (yl && yl.classList.contains('yearpicker--open')) closeYearPicker();
     });
     document.getElementById('resetPeriod').addEventListener('click',()=>{S.mF=0;S.mT=11;clampP();renderMS();renderContent()});
     window.addEventListener('load', async () => {
