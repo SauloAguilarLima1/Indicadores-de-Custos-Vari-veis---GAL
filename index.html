@@ -243,6 +243,8 @@
 
     /* === Filter bar === */
     .filter-bar {
+      position: relative;
+      z-index: 90;
       margin: 0 16px 16px;
       padding: 14px 22px;
       background: var(--glass-bg);
@@ -333,7 +335,7 @@
     .reset-link:hover { filter: brightness(1.2); }
 
     /* === Period trigger + month picker (estilo NPS) === */
-    .period-picker { position: relative; }
+    .period-picker { position: relative; z-index: 200; }
     .period-trigger {
       display: inline-flex;
       align-items: center;
@@ -386,7 +388,20 @@
       transform-origin: top left;
       pointer-events: none;
       transition: opacity var(--dur-base) var(--ease-glide), transform var(--dur-base) var(--ease-glide);
-      z-index: 60;
+      z-index: 300;
+    }
+    /* Fundo opaco no picker — necessario porque tabs/panel-header tem
+       backdrop-filter proprio e estavam pintando por cima. Mantemos um
+       gradient sutil pra preservar a aparencia de vidro. */
+    :root:not([data-mode="light"]) .monthpicker {
+      background:
+        linear-gradient(180deg, rgba(20,20,22,0.96), rgba(12,12,14,0.96)),
+        var(--glass-bg-strong);
+    }
+    :root[data-mode="light"] .monthpicker {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,253,0.96)),
+        var(--glass-bg-strong);
     }
     .monthpicker--open {
       opacity: 1;
