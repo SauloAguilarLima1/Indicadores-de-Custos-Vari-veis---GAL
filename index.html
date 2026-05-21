@@ -766,7 +766,10 @@
     .tab.active {
       color: var(--text-primary);
       font-weight: 600;
-      background: color-mix(in srgb, var(--tab-color, var(--accent-primary)) 12%, transparent);
+      background: linear-gradient(90deg,
+        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 28%, transparent) 0%,
+        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 14%, transparent) 50%,
+        color-mix(in srgb, var(--tab-color, var(--accent-primary)) 4%, transparent) 100%);
       border-color: color-mix(in srgb, var(--tab-color, var(--accent-primary)) 55%, transparent);
       box-shadow:
         0 0 0 1px color-mix(in srgb, var(--tab-color, var(--accent-primary)) 30%, transparent),
