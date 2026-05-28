@@ -16,6 +16,15 @@
     })();
   </script>
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script>
+    /* Guard de sessao: sem token valido manda pra login.html antes de carregar o resto. */
+    (function(){
+      var token = localStorage.getItem('gal_session_token');
+      if(!token){ window.location.replace('./login.html'); }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1132,6 +1141,10 @@
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Atualizar
       </button>
+      <button class="btn" id="btnSair" aria-label="Encerrar sessao" title="Encerrar sessao">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
       <div class="last-update" id="lastUpdate">
         <span class="last-update__dot"></span>
         <div class="last-update__text">
@@ -1592,9 +1605,9 @@
     function uTS(){document.getElementById('updateTime').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
 
     /* ===================================================================
-       LIVE SYNC — Google Sheets via gviz, polling 30s
+       LIVE SYNC — Supabase via RPC get_dashboard_data, polling 30s
        =================================================================== */
-    const SHEET_ID = '1yzu4QLQXR4LCmL9x4Ooy8cx9vurFqJVJ3UfSQCdtyg0';
+    const supa = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
     const SYNC_INTERVAL = 30000;
     /* Mapeia nome da empresa na planilha → chave usada no dashboard */
     const HOTEL_MAP = {
@@ -1613,15 +1626,62 @@
     function normMonth(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 
     async function fetchSheet(){
-      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&_=${Date.now()}`;
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = await res.text();
-      const m = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
-      if (!m) throw new Error('formato gviz inesperado');
-      const obj = JSON.parse(m[1]);
-      if (obj.status !== 'ok') throw new Error(`gviz status=${obj.status}`);
-      return { sig: obj.sig, rows: obj.table.rows || [] };
+      const token = localStorage.getItem('gal_session_token');
+      if(!token){ window.location.replace('./login.html'); throw new Error('Sem sessao'); }
+      const { data, error } = await supa.rpc('get_dashboard_data', { p_token: token });
+      if(error){
+        if(error.code === '28000' || /sess(a|ã)o/i.test(error.message||'')){
+          localStorage.removeItem('gal_session_token');
+          window.location.replace('./login.html');
+          throw new Error('Sessao expirada');
+        }
+        throw error;
+      }
+      const records = (data && data.custos) || [];
+      const rows = recordsToGvizRows(records);
+      /* Sig barato: tamanho + soma de timestamps inexistentes -> usa length do JSON.
+         Em volume pequeno o custo eh negligenciavel e evita re-render desnecessario. */
+      const sig = records.length + ':' + JSON.stringify(records).length;
+      return { sig, rows };
+    }
+
+    /* Mapeia o hotel armazenado no banco (label limpo) -> string esperada por HOTEL_MAP/normHotel.
+       Mantemos HOTEL_MAP intocado pra preservar compatibilidade caso o sync volte a vir do Sheets. */
+    const HOTEL_LABEL_FOR_PARSE = {
+      'Pedra Torta': 'pousada pedra torta',
+      'Vira Canoa': 'pousada vira canoa',
+      'Resende Imperial': 'resende imperial',
+      'Terra Boa': 'terra boa hotel boutique'
+    };
+    const MONTH_NAME_BY_IDX = ['janeiro','fevereiro','marco','abril','maio','junho',
+                               'julho','agosto','setembro','outubro','novembro','dezembro'];
+    /* Converte registros do Supabase pro formato gviz {c:[{v:...},...]} que parseSheet consome.
+       Plugar uma fonte nova sem tocar nas 90+ linhas de parseSheet/parseSheet-consolidacao. */
+    function recordsToGvizRows(records){
+      const cell = v => ({ v: (v === null || v === undefined) ? null : v });
+      return records.map(r => ({
+        c: [
+          cell(MONTH_NAME_BY_IDX[r.mes] || null),
+          cell(r.ano != null ? Number(r.ano) : null),
+          cell(HOTEL_LABEL_FOR_PARSE[r.hotel] || r.hotel),
+          cell(r.pax != null ? Number(r.pax) : null),
+          cell(r.diarias != null ? Number(r.diarias) : null),
+          cell(r.ocupacao != null ? Number(r.ocupacao) : null),
+          cell(r.cafe != null ? Number(r.cafe) : null),
+          cell(r.lavanderia != null ? Number(r.lavanderia) : null),
+          cell(r.agua != null ? Number(r.agua) : null),
+          cell(r.energia != null ? Number(r.energia) : null),
+          cell(r.meta_cafe != null ? Number(r.meta_cafe) : null),
+          cell(r.meta_lavanderia != null ? Number(r.meta_lavanderia) : null)
+        ]
+      }));
+    }
+
+    function logout(){
+      const token = localStorage.getItem('gal_session_token');
+      if(token){ supa.rpc('logout', { p_token: token }).catch(()=>{}); }
+      localStorage.removeItem('gal_session_token');
+      window.location.replace('./login.html');
     }
 
     function emptyMetrics(){
@@ -1789,6 +1849,7 @@
     }
 
     document.getElementById('refresh').addEventListener('click',()=>{ pollSync(false); });
+    document.getElementById('btnSair').addEventListener('click', logout);
     /* === Dark / light mode toggle === */
     function applyMode(m){
       document.documentElement.dataset.mode = m;
