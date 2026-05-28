@@ -19,9 +19,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <script>
-    /* Guard de sessao: sem token valido manda pra login.html antes de carregar o resto. */
+    /* Guard de sessao: sem token valido manda pra login.html antes de carregar o resto.
+       Token em sessionStorage (nao localStorage): a sessao cai ao fechar a aba/janela. */
     (function(){
-      var token = localStorage.getItem('gal_session_token');
+      var token = sessionStorage.getItem('gal_session_token');
       if(!token){ window.location.replace('./login.html'); }
     })();
   </script>
@@ -1724,12 +1725,12 @@
     function normMonth(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 
     async function fetchSheet(){
-      const token = localStorage.getItem('gal_session_token');
+      const token = sessionStorage.getItem('gal_session_token');
       if(!token){ window.location.replace('./login.html'); throw new Error('Sem sessao'); }
       const { data, error } = await supa.rpc('get_dashboard_data', { p_token: token });
       if(error){
         if(error.code === '28000' || /sess(a|ã)o/i.test(error.message||'')){
-          localStorage.removeItem('gal_session_token');
+          sessionStorage.removeItem('gal_session_token');
           window.location.replace('./login.html');
           throw new Error('Sessao expirada');
         }
@@ -1777,9 +1778,9 @@
     }
 
     function logout(){
-      const token = localStorage.getItem('gal_session_token');
+      const token = sessionStorage.getItem('gal_session_token');
       if(token){ supa.rpc('logout', { p_token: token }).catch(()=>{}); }
-      localStorage.removeItem('gal_session_token');
+      sessionStorage.removeItem('gal_session_token');
       window.location.replace('./login.html');
     }
 
@@ -2029,7 +2030,7 @@
         if (btn) btn.style.display = flag ? '' : 'none';
       };
 
-      function tok(){ return localStorage.getItem('gal_session_token'); }
+      function tok(){ return sessionStorage.getItem('gal_session_token'); }
       async function rpc(fn, args){
         const { data, error } = await supa.rpc(fn, args);
         if (error) throw error;
