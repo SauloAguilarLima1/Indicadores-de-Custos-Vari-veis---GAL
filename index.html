@@ -689,6 +689,97 @@
     }
     body.numbers-hidden .btn-hide .hide-slash { opacity: 0; }
 
+    /* === Admin (Fase C) — overlay + modais liquid glass === */
+    .admin-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+      background: rgba(8, 10, 14, 0.55);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+    }
+    .admin-overlay.open { display: flex; }
+    .admin-modal {
+      width: 100%; max-width: 420px;
+      padding: 24px;
+      background: var(--glass-bg-strong);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid var(--glass-border-strong);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-glass);
+      animation: adminPop var(--dur-base) var(--ease-glide);
+    }
+    :root:not([data-mode="light"]) .admin-modal {
+      background: linear-gradient(180deg, rgba(20,20,22,0.96), rgba(12,12,14,0.96)), var(--glass-bg-strong);
+    }
+    :root[data-mode="light"] .admin-modal {
+      background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,250,253,0.97)), var(--glass-bg-strong);
+    }
+    .admin-modal--wide { max-width: 540px; }
+    .admin-modal[hidden] { display: none; }
+    @keyframes adminPop { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+    .admin-modal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .admin-modal__head h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+    .admin-modal__close {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-secondary); font-size: 24px; line-height: 1;
+      width: 30px; height: 30px; border-radius: 50%;
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .admin-modal__close:hover { background: var(--surface-soft-hover); color: var(--text-primary); }
+    .admin-modal__hint { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+    .admin-field { display: block; margin-bottom: 14px; }
+    .admin-field > span { display: block; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: 0.01em; }
+    .admin-field input {
+      width: 100%; box-sizing: border-box; padding: 10px 12px;
+      background: var(--surface-soft); color: var(--text-primary);
+      border: 1px solid var(--glass-border-strong); border-radius: var(--r-md);
+      font-size: 13px; font-family: inherit;
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .admin-field input:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .admin-check { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px; cursor: pointer; }
+    .admin-check input { width: 16px; height: 16px; accent-color: var(--accent-primary); cursor: pointer; }
+    .admin-err { font-size: 12px; color: #e5746b; min-height: 16px; margin-bottom: 6px; }
+    .admin-err.ok { color: #6fbf73; }
+    .admin-modal__actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .admin-btn {
+      padding: 9px 18px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 600;
+      cursor: pointer; font-family: inherit; letter-spacing: -0.005em;
+      background: var(--surface-soft); color: var(--text-secondary); border: 1px solid var(--glass-border);
+      transition: all var(--dur-fast) var(--ease-glide);
+    }
+    .admin-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); transform: translateY(-1px); }
+    .admin-btn--primary { background: var(--accent-soft); color: var(--accent-primary); border-color: var(--accent-primary); }
+    .admin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* lista de usuários */
+    .admin-userlist { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; max-height: 50vh; overflow-y: auto; }
+    .admin-user {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      background: var(--surface-soft); border: 1px solid var(--glass-border); border-radius: var(--r-md);
+    }
+    .admin-user__info { flex: 1; min-width: 0; }
+    .admin-user__name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .admin-user__meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+    .admin-user__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .admin-ico {
+      width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 9px; border: 1px solid var(--glass-border); background: var(--surface-soft);
+      color: var(--text-secondary); cursor: pointer; transition: all var(--dur-fast) var(--ease-glide); line-height: 0;
+    }
+    .admin-ico:hover { transform: translateY(-1px); }
+    .admin-ico:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    /* toggle admin: verde = admin, vermelho = comum */
+    .admin-ico--role.is-admin { color: #6fbf73; border-color: rgba(111,191,115,0.5); background: rgba(111,191,115,0.12); }
+    .admin-ico--role.is-common { color: #e5746b; border-color: rgba(229,116,107,0.5); background: rgba(229,116,107,0.12); }
+    .admin-ico--key:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
+    .admin-ico--trash { color: #e5746b; }
+    .admin-ico--trash:hover { background: rgba(229,116,107,0.14); border-color: rgba(229,116,107,0.6); }
+    .admin-user__name-tag { font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle; }
+    .admin-user__name-tag.adm { color: #6fbf73; background: rgba(111,191,115,0.14); }
+
     /* === Hide numbers — blurs numeric content while preserving layout === */
     body.numbers-hidden .kpi-value,
     body.numbers-hidden .cost-value,
@@ -1129,6 +1220,13 @@
           <svg class="icon-night" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <svg class="icon-day" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         </span>
+      </button>
+      <button class="btn btn-icon btn-admin" id="adminToggle" aria-label="Gerenciar usuários" title="Gerenciar usuários" style="display:none">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
       </button>
       <button class="btn btn-icon btn-hide" id="hideToggle" aria-label="Esconder números" aria-pressed="false">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1637,6 +1735,7 @@
         }
         throw error;
       }
+      if (data) { setAdminAccess(!!data.is_admin, data.username || ''); }
       const records = (data && data.custos) || [];
       const rows = recordsToGvizRows(records);
       /* Sig barato: tamanho + soma de timestamps inexistentes -> usa length do JSON.
@@ -1906,6 +2005,254 @@
       setInterval(() => pollSync(false), SYNC_INTERVAL);
       setInterval(tickCountdown, 1000);
     });
+
+    /* ===================================================================
+       FASE C — Gestão de usuários (admin). 2ª auth server-side em cada RPC.
+       =================================================================== */
+    (function adminModule(){
+      let isAdmin = false, myUsername = '';
+      let adminPwd = null;          /* senha do admin, em memória só enquanto o painel está aberto */
+      let myUserId = null;          /* id do próprio admin logado (pra bloquear auto-remoção na UI) */
+
+      const $ = id => document.getElementById(id);
+      const overlay = $('adminOverlay');
+      const panels = {
+        reauth: $('adminReauthModal'),
+        manager: $('adminManagerModal'),
+        create: $('adminCreateModal'),
+        reset: $('adminResetModal')
+      };
+
+      window.setAdminAccess = function(flag, username){
+        isAdmin = flag; myUsername = username;
+        const btn = $('adminToggle');
+        if (btn) btn.style.display = flag ? '' : 'none';
+      };
+
+      function tok(){ return localStorage.getItem('gal_session_token'); }
+      async function rpc(fn, args){
+        const { data, error } = await supa.rpc(fn, args);
+        if (error) throw error;
+        return data;
+      }
+      function showPanel(name){
+        Object.entries(panels).forEach(([k, el]) => { el.hidden = (k !== name); });
+      }
+      function openOverlay(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+      function closeAll(){
+        overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
+        adminPwd = null;
+        ['adminReauthSenha','adminCreateUser','adminCreateSenha','adminResetSenha'].forEach(id => { const e = $(id); if (e) e.value = ''; });
+        ['adminReauthErr','adminManagerErr','adminCreateErr','adminResetErr'].forEach(id => setErr(id, ''));
+        const chk = $('adminCreateIsAdmin'); if (chk) chk.checked = false;
+      }
+      function setErr(id, msg, ok){
+        const e = $(id); if (!e) return;
+        e.textContent = msg || ''; e.classList.toggle('ok', !!ok);
+      }
+      function msgFrom(err){
+        const m = (err && (err.message || err.error_description)) || 'Erro inesperado';
+        return m.replace(/^.*?:\s*/, '');
+      }
+
+      /* ---- abrir painel: pede 2ª auth ---- */
+      $('adminToggle').addEventListener('click', () => {
+        showPanel('reauth'); openOverlay();
+        setTimeout(() => $('adminReauthSenha').focus(), 50);
+      });
+
+      $('adminReauthForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const senha = $('adminReauthSenha').value;
+        setErr('adminReauthErr', 'Verificando…', true);
+        try {
+          const r = await rpc('admin_reauth', { p_token: tok(), p_senha: senha });
+          if (!r || !r.success) { setErr('adminReauthErr', 'Senha incorreta'); return; }
+          adminPwd = senha;
+          await loadUsers();
+          showPanel('manager');
+          setErr('adminReauthErr', '');
+        } catch (err) { setErr('adminReauthErr', msgFrom(err)); }
+      });
+
+      /* ---- listar usuários ---- */
+      async function loadUsers(){
+        setErr('adminManagerErr', '');
+        const list = $('adminUserList');
+        list.innerHTML = '<p class="admin-modal__hint">Carregando…</p>';
+        let users;
+        try { users = await rpc('admin_listar_usuarios', { p_token: tok() }); }
+        catch (err) { list.innerHTML = ''; setErr('adminManagerErr', msgFrom(err)); return; }
+        myUserId = (users.find(u => u.username === myUsername) || {}).id ?? null;
+        const totalAdmins = users.filter(u => u.is_admin).length;
+        list.innerHTML = '';
+        users.forEach(u => {
+          const isSelf = u.id === myUserId;
+          const lastAdmin = u.is_admin && totalAdmins <= 1;
+          const row = document.createElement('div');
+          row.className = 'admin-user';
+          const last = u.ultimo_login ? new Date(u.ultimo_login).toLocaleDateString('pt-BR') : 'nunca';
+          row.innerHTML =
+            '<div class="admin-user__info">' +
+              '<div class="admin-user__name">' + esc(u.username) +
+                (u.is_admin ? '<span class="admin-user__name-tag adm">ADMIN</span>' : '') + '</div>' +
+              '<div class="admin-user__meta">••••••••  ·  último acesso: ' + last + '</div>' +
+            '</div>' +
+            '<div class="admin-user__actions">' +
+              '<button class="admin-ico admin-ico--role ' + (u.is_admin ? 'is-admin' : 'is-common') + '" ' +
+                'title="' + (u.is_admin ? 'Rebaixar para comum' : 'Promover a admin') + '" ' +
+                (lastAdmin ? 'disabled' : '') + '>' + iconShield() + '</button>' +
+              '<button class="admin-ico admin-ico--key" title="Redefinir senha">' + iconKey() + '</button>' +
+              '<button class="admin-ico admin-ico--trash" title="Remover usuário" ' +
+                ((isSelf || lastAdmin) ? 'disabled' : '') + '>' + iconTrash() + '</button>' +
+            '</div>';
+          const [roleBtn, keyBtn, trashBtn] = row.querySelectorAll('button');
+          roleBtn.addEventListener('click', () => toggleRole(u));
+          keyBtn.addEventListener('click', () => openReset(u));
+          trashBtn.addEventListener('click', () => removeUser(u));
+          list.appendChild(row);
+        });
+      }
+
+      async function toggleRole(u){
+        try {
+          await rpc('admin_set_admin', { p_token: tok(), p_admin_senha: adminPwd, p_user_id: u.id, p_is_admin: !u.is_admin });
+          await loadUsers();
+        } catch (err) { setErr('adminManagerErr', msgFrom(err)); }
+      }
+
+      async function removeUser(u){
+        if (!confirm('Remover o usuário "' + u.username + '"? Esta ação não pode ser desfeita.')) return;
+        try {
+          await rpc('admin_remover_usuario', { p_token: tok(), p_admin_senha: adminPwd, p_user_id: u.id });
+          await loadUsers();
+        } catch (err) { setErr('adminManagerErr', msgFrom(err)); }
+      }
+
+      /* ---- criar ---- */
+      $('adminOpenCreate').addEventListener('click', () => { setErr('adminCreateErr',''); showPanel('create'); setTimeout(()=>$('adminCreateUser').focus(),50); });
+      $('adminCreateBack').addEventListener('click', () => showPanel('manager'));
+      $('adminCreateForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = $('adminCreateUser').value.trim();
+        const senha = $('adminCreateSenha').value;
+        const adm = $('adminCreateIsAdmin').checked;
+        if (senha.length < 8) { setErr('adminCreateErr', 'Senha precisa ter no mínimo 8 caracteres'); return; }
+        try {
+          await rpc('admin_criar_usuario', { p_token: tok(), p_admin_senha: adminPwd, p_username: username, p_senha: senha, p_is_admin: adm });
+          $('adminCreateUser').value = ''; $('adminCreateSenha').value = ''; $('adminCreateIsAdmin').checked = false;
+          await loadUsers(); showPanel('manager');
+        } catch (err) { setErr('adminCreateErr', msgFrom(err)); }
+      });
+
+      /* ---- redefinir senha ---- */
+      let resetTarget = null;
+      function openReset(u){ resetTarget = u; $('adminResetUser').textContent = u.username; $('adminResetSenha').value=''; setErr('adminResetErr',''); showPanel('reset'); setTimeout(()=>$('adminResetSenha').focus(),50); }
+      $('adminResetBack').addEventListener('click', () => showPanel('manager'));
+      $('adminResetForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nova = $('adminResetSenha').value;
+        if (nova.length < 8) { setErr('adminResetErr', 'Senha precisa ter no mínimo 8 caracteres'); return; }
+        try {
+          await rpc('admin_redefinir_senha', { p_token: tok(), p_admin_senha: adminPwd, p_user_id: resetTarget.id, p_nova_senha: nova });
+          setErr('adminResetErr', 'Senha redefinida.', true);
+          setTimeout(() => showPanel('manager'), 800);
+        } catch (err) { setErr('adminResetErr', msgFrom(err)); }
+      });
+
+      /* ---- fechar ---- */
+      overlay.querySelectorAll('[data-admin-close]').forEach(b => b.addEventListener('click', closeAll));
+      overlay.addEventListener('click', e => { if (e.target === overlay) closeAll(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeAll(); });
+
+      /* ---- helpers ---- */
+      function esc(s){ const d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+      function iconShield(){ return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'; }
+      function iconKey(){ return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>'; }
+      function iconTrash(){ return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'; }
+    })();
   </script>
+
+  <!-- ===== FASE C — Admin: gestão de usuários ===== -->
+  <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
+    <!-- 2ª auth: porta de entrada -->
+    <div class="admin-modal" id="adminReauthModal" role="dialog" aria-modal="true" aria-labelledby="adminReauthTitle">
+      <div class="admin-modal__head">
+        <h2 id="adminReauthTitle">Acesso restrito</h2>
+        <button class="admin-modal__close" data-admin-close aria-label="Fechar">&times;</button>
+      </div>
+      <p class="admin-modal__hint">Confirme sua senha de administrador para gerenciar usuários.</p>
+      <form id="adminReauthForm" autocomplete="off">
+        <label class="admin-field">
+          <span>Senha</span>
+          <input type="password" id="adminReauthSenha" autocomplete="current-password" required>
+        </label>
+        <p class="admin-err" id="adminReauthErr"></p>
+        <div class="admin-modal__actions">
+          <button type="submit" class="admin-btn admin-btn--primary">Entrar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Gerenciador de usuários -->
+    <div class="admin-modal admin-modal--wide" id="adminManagerModal" role="dialog" aria-modal="true" aria-labelledby="adminManagerTitle" hidden>
+      <div class="admin-modal__head">
+        <h2 id="adminManagerTitle">Gerenciador de usuários</h2>
+        <button class="admin-modal__close" data-admin-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="admin-userlist" id="adminUserList"></div>
+      <p class="admin-err" id="adminManagerErr"></p>
+      <div class="admin-modal__actions">
+        <button type="button" class="admin-btn admin-btn--primary" id="adminOpenCreate">+ Criar novo usuário</button>
+      </div>
+    </div>
+
+    <!-- Criar novo usuário (popout separado) -->
+    <div class="admin-modal" id="adminCreateModal" role="dialog" aria-modal="true" aria-labelledby="adminCreateTitle" hidden>
+      <div class="admin-modal__head">
+        <h2 id="adminCreateTitle">Criar novo usuário</h2>
+        <button class="admin-modal__close" data-admin-close aria-label="Fechar">&times;</button>
+      </div>
+      <form id="adminCreateForm" autocomplete="off">
+        <label class="admin-field">
+          <span>Usuário</span>
+          <input type="text" id="adminCreateUser" autocomplete="off" placeholder="ex.: joao" required>
+        </label>
+        <label class="admin-field">
+          <span>Senha (mín. 8)</span>
+          <input type="password" id="adminCreateSenha" autocomplete="new-password" minlength="8" required>
+        </label>
+        <label class="admin-check">
+          <input type="checkbox" id="adminCreateIsAdmin">
+          <span>Conceder acesso de administrador</span>
+        </label>
+        <p class="admin-err" id="adminCreateErr"></p>
+        <div class="admin-modal__actions">
+          <button type="button" class="admin-btn" id="adminCreateBack">Voltar</button>
+          <button type="submit" class="admin-btn admin-btn--primary">Criar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Redefinir senha (popout) -->
+    <div class="admin-modal" id="adminResetModal" role="dialog" aria-modal="true" aria-labelledby="adminResetTitle" hidden>
+      <div class="admin-modal__head">
+        <h2 id="adminResetTitle">Redefinir senha</h2>
+        <button class="admin-modal__close" data-admin-close aria-label="Fechar">&times;</button>
+      </div>
+      <form id="adminResetForm" autocomplete="off">
+        <p class="admin-modal__hint">Nova senha para <strong id="adminResetUser">—</strong>.</p>
+        <label class="admin-field">
+          <span>Nova senha (mín. 8)</span>
+          <input type="password" id="adminResetSenha" autocomplete="new-password" minlength="8" required>
+        </label>
+        <p class="admin-err" id="adminResetErr"></p>
+        <div class="admin-modal__actions">
+          <button type="button" class="admin-btn" id="adminResetBack">Voltar</button>
+          <button type="submit" class="admin-btn admin-btn--primary">Redefinir</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
