@@ -1778,9 +1778,12 @@
     }
 
     function logout(){
-      const token = sessionStorage.getItem('gal_session_token');
+      /* Pega o token de qualquer storage (cobre token legado da fase pre-sessionStorage) e limpa os dois,
+         senao o login.html pode re-logar sozinho com o token velho do localStorage. */
+      const token = sessionStorage.getItem('gal_session_token') || localStorage.getItem('gal_session_token');
       if(token){ supa.rpc('logout', { p_token: token }).catch(()=>{}); }
       sessionStorage.removeItem('gal_session_token');
+      localStorage.removeItem('gal_session_token');
       window.location.replace('./login.html');
     }
 
