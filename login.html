@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR" data-mode="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acesso â€” Indicadores de Custeio Â· GAL</title>
+  <title>Acesso — Indicadores de Custeio · GAL</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* === Dark estÃ¡tico â€” mesma temÃ¡tica do dashboard (sem toggle) === */
+    /* === Dark estático — mesma temática do dashboard (sem toggle) === */
     :root {
       --bg-base: #050505;
       --text-primary: #f0f1f4;
@@ -22,6 +22,9 @@
       --glass-bg-strong: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.07);
       --segment-bg: rgba(0, 0, 0, 0.45);
+
+      --accent-primary: #6da3d9;
+      --accent-secondary: #3a7ab8;
 
       --r-md: 14px;
       --r-lg: 20px;
@@ -50,15 +53,42 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* === Atmosphere â€” mesmo fundo radial do dashboard === */
+    /* === Atmosphere — auroras azuis vibrantes em movimento (accent do dashboard) === */
     .atmosphere {
       position: fixed;
       inset: 0;
       z-index: -1;
-      background:
-        radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255, 255, 255, 0.02), transparent 70%),
-        radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255, 255, 255, 0.015), transparent 70%),
-        var(--bg-base);
+      overflow: hidden;
+      background: var(--bg-base);
+    }
+    .atmosphere::before,
+    .atmosphere::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+    }
+    .atmosphere::before {
+      width: 560px; height: 560px;
+      top: -180px; left: -140px;
+      background: radial-gradient(circle, rgba(109, 163, 217, 0.55), transparent 70%);
+      opacity: 0.6;
+      animation: drift1 15s ease-in-out infinite;
+    }
+    .atmosphere::after {
+      width: 500px; height: 500px;
+      bottom: -180px; right: -140px;
+      background: radial-gradient(circle, rgba(58, 122, 184, 0.50), transparent 70%);
+      opacity: 0.55;
+      animation: drift2 18s ease-in-out infinite;
+    }
+    @keyframes drift1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(70px, 50px) scale(1.08); }
+    }
+    @keyframes drift2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-60px, -40px) scale(1.1); }
     }
 
     .login-wrap {
@@ -70,7 +100,7 @@
       gap: 30px;
     }
 
-    /* Logo com inversÃ£o de cor (idÃªntica ao header do dashboard no dark) */
+    /* Logo com inversão de cor (idêntica ao header do dashboard no dark) */
     .login-logo {
       height: 66px;
       width: auto;
@@ -80,7 +110,7 @@
       user-select: none;
     }
 
-    /* Card central â€” liquid glass */
+    /* Card central — liquid glass */
     .login-card {
       width: 100%;
       background: var(--glass-bg-strong);
@@ -214,13 +244,13 @@
 
     <div class="login-card">
       <h1>Indicadores de Custeio</h1>
-      <p class="sub">Acesso restrito â€” Grupo Aguilar Lima</p>
+      <p class="sub">Acesso restrito — Grupo Aguilar Lima</p>
 
       <div id="erro" class="erro" role="alert"></div>
 
       <form id="form-login" autocomplete="on">
         <div class="field">
-          <label for="username">UsuÃ¡rio</label>
+          <label for="username">Usuário</label>
           <input type="text" id="username" name="username" autocomplete="username" required autofocus>
         </div>
         <div class="field">
@@ -244,14 +274,14 @@
     (function(){
       const cfg = window.SUPABASE_CONFIG;
       if(!cfg || cfg.url.includes('SEU-PROJETO') || cfg.anonKey.includes('COLE_AQUI')){
-        mostrarErro('ConfiguraÃ§Ã£o do Supabase ainda nÃ£o foi preenchida em config.js.');
+        mostrarErro('Configuração do Supabase ainda não foi preenchida em config.js.');
         document.getElementById('btn-entrar').disabled = true;
         return;
       }
 
       const supa = window.supabase.createClient(cfg.url, cfg.anonKey);
 
-      // JÃ¡ tem sessÃ£o vÃ¡lida? pula o login.
+      // Já tem sessão válida? pula o login.
       const tokenSalvo = localStorage.getItem('gal_session_token');
       if(tokenSalvo){
         supa.rpc('get_dashboard_data', { p_token: tokenSalvo }).then(({ error }) => {
@@ -266,7 +296,7 @@
         const btn = document.getElementById('btn-entrar');
         const username = document.getElementById('username').value.trim();
         const senha = document.getElementById('senha').value;
-        if(!username || !senha){ mostrarErro('Preencha usuÃ¡rio e senha.'); return; }
+        if(!username || !senha){ mostrarErro('Preencha usuário e senha.'); return; }
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>Entrando...';
@@ -279,7 +309,7 @@
           window.location.replace('./index.html');
         } catch(err){
           console.error(err);
-          mostrarErro('Erro de comunicaÃ§Ã£o com o servidor. Tente novamente.');
+          mostrarErro('Erro de comunicação com o servidor. Tente novamente.');
         } finally {
           btn.disabled = false;
           btn.textContent = 'Entrar';
