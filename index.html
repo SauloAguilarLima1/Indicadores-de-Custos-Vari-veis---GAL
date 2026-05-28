@@ -1777,13 +1777,14 @@
       }));
     }
 
-    function logout(){
+    async function logout(){
       /* Pega o token de qualquer storage (cobre token legado da fase pre-sessionStorage) e limpa os dois,
          senao o login.html pode re-logar sozinho com o token velho do localStorage. */
       const token = sessionStorage.getItem('gal_session_token') || localStorage.getItem('gal_session_token');
-      if(token){ supa.rpc('logout', { p_token: token }).catch(()=>{}); }
       sessionStorage.removeItem('gal_session_token');
       localStorage.removeItem('gal_session_token');
+      /* supa.rpc() retorna um builder thenable do PostgREST, que NAO tem .catch: usar await + try/catch. */
+      if(token){ try { await supa.rpc('logout', { p_token: token }); } catch(e){} }
       window.location.replace('./login.html');
     }
 
