@@ -1910,6 +1910,12 @@
       if (!DATA[S.year]) {
         S.year = FY.length ? FY[FY.length-1] : (YEARS[YEARS.length-1] || S.year);
       }
+      /* Reabre a janela de meses ate o fim ANTES de reclampar. clampP() so ENCURTA o mes
+         final (S.mT), nunca aumenta — entao um mes novo que chega pelo sync (ex.: voce
+         preenche maio) ficava fora da fatia exibida e so aparecia dando refresh na pagina
+         (que reseta mT=11). Igualar ao comportamento do refresh aqui faz o dado novo
+         aparecer tambem no auto-update e no botao Atualizar. */
+      S.mT = 11;
       clampP();
       renderAll();
     }
