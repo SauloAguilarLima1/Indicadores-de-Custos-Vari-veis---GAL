@@ -1556,8 +1556,11 @@
 
     // State
     let FY=YEARS.filter(y=>!PARTIAL.includes(y));
+    /* Ano de exercício vigente: o dashboard sempre abre no ano atual (se houver dados dele). */
+    const CY = String(new Date().getFullYear());
+    let bootYear = true;
     const S={
-      year:FY.length?FY[FY.length-1]:YEARS[YEARS.length-1],
+      year: DATA[CY] ? CY : (FY.length?FY[FY.length-1]:YEARS[YEARS.length-1]),
       tabId:'consolidado',mF:0,mT:11,
       vm:{}  // view modes per metric key: { total_costs:'pax', cafe:'diaria', ... }
     };
@@ -1913,7 +1916,12 @@
       YEARS = Object.keys(DATA).sort();
       PARTIAL = YEARS.filter(y => DATA[y].consolidated.total_costs.some(v => v === null));
       FY = YEARS.filter(y => !PARTIAL.includes(y));
-      if (!DATA[S.year]) {
+      if (bootYear) {
+        /* 1ª carga (após o sync inicial): força o ano vigente se houver dados dele.
+           Depois respeita a navegação do usuário (ano/período escolhidos à mão). */
+        bootYear = false;
+        S.year = DATA[CY] ? CY : (FY.length ? FY[FY.length-1] : (YEARS[YEARS.length-1] || S.year));
+      } else if (!DATA[S.year]) {
         S.year = FY.length ? FY[FY.length-1] : (YEARS[YEARS.length-1] || S.year);
       }
       /* Reabre a janela de meses ate o fim ANTES de reclampar. clampP() so ENCURTA o mes
