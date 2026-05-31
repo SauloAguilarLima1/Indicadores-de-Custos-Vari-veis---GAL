@@ -1931,12 +1931,15 @@
       const time = document.getElementById('updateTime');
       time.textContent = `há ${secs}s`;
     }
-    async function pollSync(initial){
-      if (sync.status === 'syncing') return;
+    async function pollSync(initial, force){
+      /* force=true (clique manual em Atualizar): ignora status preso em 'syncing' e
+         re-renderiza mesmo se a assinatura nao mudou, garantindo feedback visivel e o
+         estado atual do banco. O polling automatico (force=false) mantem a otimizacao. */
+      if (sync.status === 'syncing' && !force) return;
       setSyncStatus('syncing', 'Sincronizando…');
       try {
         const { sig, rows } = await fetchSheet();
-        if (sig !== sync.lastSig) {
+        if (force || sig !== sync.lastSig) {
           const parsed = parseSheet(rows);
           if (Object.keys(parsed.DATA).length === 0) throw new Error('planilha vazia');
           applyLiveData(parsed.DATA, parsed.METAS);
@@ -1954,7 +1957,7 @@
       }
     }
 
-    document.getElementById('refresh').addEventListener('click',()=>{ pollSync(false); });
+    document.getElementById('refresh').addEventListener('click',()=>{ pollSync(false, true); });
     document.getElementById('btnSair').addEventListener('click', logout);
     /* === Dark / light mode toggle === */
     function applyMode(m){
