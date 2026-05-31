@@ -1957,7 +1957,35 @@
       }
     }
 
-    document.getElementById('refresh').addEventListener('click',()=>{ pollSync(false, true); });
+    /* Atualizar (clique manual): puxa a planilha -> banco AGORA (dispara a Edge Function
+       sync-sheets, sem esperar o cron de 1 min) e depois rele + forca render. Antes o botao
+       so lia o banco, que fica ate 1 min atras da planilha -> dava a impressao de "nao atualiza". */
+    async function manualRefresh(){
+      const btn = document.getElementById('refresh');
+      if (btn.dataset.busy === '1') return;
+      btn.dataset.busy = '1';
+      btn.disabled = true;
+      try {
+        setSyncStatus('syncing', 'Puxando planilha…');
+        let nota = '';
+        try {
+          const { data, error } = await supa.functions.invoke('sync-sheets');
+          if (error) throw error;
+          if (data && data.ok === false) throw new Error(data.erro || 'sync falhou');
+          nota = (data && data.sincronizados != null) ? ` (${data.sincronizados})` : '';
+        } catch (e) {
+          console.warn('[custeio] sync on-demand falhou, lendo o banco mesmo assim:', e);
+          nota = ' (planilha offline)';
+        }
+        setSyncStatus('syncing', 'Atualizando…');
+        await pollSync(false, true);
+        if (sync.status === 'idle') setSyncStatus('idle', 'atualizado' + nota);
+      } finally {
+        btn.disabled = false;
+        btn.dataset.busy = '0';
+      }
+    }
+    document.getElementById('refresh').addEventListener('click', manualRefresh);
     document.getElementById('btnSair').addEventListener('click', logout);
     /* === Dark / light mode toggle === */
     function applyMode(m){
