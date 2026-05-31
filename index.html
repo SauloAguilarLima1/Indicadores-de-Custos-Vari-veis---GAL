@@ -1739,9 +1739,11 @@
       if (data) { setAdminAccess(!!data.is_admin, data.username || ''); }
       const records = (data && data.custos) || [];
       const rows = recordsToGvizRows(records);
-      /* Sig barato: tamanho + soma de timestamps inexistentes -> usa length do JSON.
-         Em volume pequeno o custo eh negligenciavel e evita re-render desnecessario. */
-      const sig = records.length + ':' + JSON.stringify(records).length;
+      /* Sig por CONTEUDO: a string JSON inteira. A versao antiga usava so o COMPRIMENTO
+         do JSON, entao trocar um valor por outro do mesmo tamanho (ex.: 100 -> 200) nao
+         mudava o sig e o dashboard nao atualizava (so um reload da pagina pegava). Em
+         volume pequeno (~116 linhas) comparar a string inteira e barato. */
+      const sig = JSON.stringify(records);
       return { sig, rows };
     }
 
